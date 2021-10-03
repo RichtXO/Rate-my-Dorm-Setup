@@ -8,7 +8,7 @@ CREATE TABLE Users (
 
 DROP TABLE Posts;
 CREATE TABLE Posts (
-    postid int NOT NULL,
+    postid bigint NOT NULL,
     username varchar(256) NOT NULL,
     caption varchar(511),
     description varchar(2047),
@@ -19,9 +19,9 @@ CREATE TABLE Posts (
 
 DROP TABLE Comments;
 CREATE TABLE Comments (
-    commentid int NOT NULL,
+    commentid bigint NOT NULL,
     username varchar(255) NOT NULL,
-    postid int NOT NULL,
+    postid bigint NOT NULL,
     text varchar(2047) NOT NULL,
     commentdate date NOT NULL,
     commenttime time NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE Comments (
 DROP TABLE Ratings;
 CREATE TABLE Ratings (
     username varchar(255) NOT NULL,
-    postid int NOT NULL,
+    postid bigint NOT NULL,
     ratingvalue int,
     PRIMARY KEY (username, postid)
 );

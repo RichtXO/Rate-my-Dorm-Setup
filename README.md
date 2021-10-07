@@ -1,3 +1,5 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/richtxo/rate-my-dorm-setup/badge)](https://www.codefactor.io/repository/github/richtxo/rate-my-dorm-setup)
+
 # Rate-my-Dorm-Setup
 A site where epic dorm layouts can be showed off.
 Stack compose of Vue for frontend, FastAPI and postgresSQL for backend

@@ -1,0 +1,39 @@
+name: Master CI/CD
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  # Needs pytest and cypress to be implemented first before
+  # setting up CI
+  # CI:
+      
+  CD:
+    # needs: CI
+    runs-on: self-hosted
+    environment: rds-prod
+
+    # env:
+    #   TOKEN: ${{ secrets.TOKEN }}
+    
+    steps:
+      - uses:  actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Build image
+        run: |
+          docker-compose -f docker-compose.yml build web api 
+          
+      - name: Update api
+        run: |
+          docker-compose -f docker-compose.yml stop api &&
+          docker-compose -f docker-compose.yml rm -f api &&
+          docker-compose -f docker-compose.yml up -d api
+
+      - name: Update web
+        run: |
+          docker-compose -f docker-compose.yml stop web &&
+          docker-compose -f docker-compose.yml rm -f web &&
+          docker-compose -f docker-compose.yml up -d web

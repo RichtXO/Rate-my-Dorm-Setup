@@ -1,11 +1,8 @@
-FROM node:lts-alpine
-
+FROM node:13-alpine as develop-stage
 WORKDIR /app
-
-RUN npm install @vue/cli@4.5.13 -g
-
-COPY package.json .
-COPY package-lock.json .
+COPY package*.json ./
 RUN npm install
+COPY ./ .
 
-CMD ["npm", "run", "serve"]
+FROM develop-stage as build-stage
+RUN npm run build

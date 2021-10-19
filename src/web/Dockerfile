@@ -1,8 +1,9 @@
-FROM node:13-alpine as develop-stage
+FROM node:lts-alpine as build-stage
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
-COPY ./ .
-
-FROM develop-stage as build-stage
+COPY . .
 RUN npm run build
+
+FROM bunkerity/bunkerized-nginx:latest as production-stage
+COPY --from=build-stage /app/dist /www

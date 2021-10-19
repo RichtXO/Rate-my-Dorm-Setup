@@ -3,12 +3,8 @@ import App from "./App.vue";
 import "./registerServiceWorker";
 import router from "./router";
 import store from "./store";
-import axios from "axios";
 
-axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "http://localhost:5000/";
-
-Vue.config.productionTip = false;
+Vue.config.productionTip = true;
 
 new Vue({
   router,

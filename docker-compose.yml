@@ -9,19 +9,26 @@ services:
     restart: unless-stopped
     build: ./src/web
     container_name: rds_web
-    volumes:
-      - ./src/web:/app
     ports:
-      - 8080:8080
+      - 80:8080
+      - 443:8443
     depends_on:
       - rds_api
+    environment:
+      - SERVER_NAME=${HOST:-localhost}
+      - REDIRECT_HTTP_TO_HTTPS=no
+      - AUTO_LETS_ENCRYPT=no
+      - USE_CLIENT_CACHE=yes
+      - USE_GZIP=yes
+      - USE_REVERSE_PROXY=yes
+      - REVERSE_PROXY_URL_1=/api
+      - REVERSE_PROXY_HOST_1=http://rds_api:5000/
+
 
   api:
     restart: unless-stopped
     container_name: rds_api
     build: ./src/api
-    ports:
-      - 5000:5000
     volumes:
       - ./src/api:/app
     command: uvicorn src.main:app --reload --host 0.0.0.0 --port 5000

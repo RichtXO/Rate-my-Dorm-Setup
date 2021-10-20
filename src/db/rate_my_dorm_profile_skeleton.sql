@@ -1,13 +1,16 @@
-DROP TABLE Users;
-CREATE TABLE Users (
-    username varchar(255) NOT NULL,
-    email varchar(255) NOT NULL,
+CREATE TABLE IF NOT EXISTS Users (
+    username varchar(255) NOT NULL UNIQUE,
+    email varchar(255) NOT NULL UNIQUE,
     password varchar(255) NOT NULL,
     PRIMARY KEY (username)
 );
 
-DROP TABLE Posts;
-CREATE TABLE Posts (
+CREATE TABLE IF NOT EXISTS Follows(
+    follower varchar(255) NOT NULL,
+    follows varchar(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Posts (
     postid bigint NOT NULL,
     username varchar(256) NOT NULL,
     caption varchar(511),
@@ -17,8 +20,7 @@ CREATE TABLE Posts (
     PRIMARY KEY (postid)
 );
 
-DROP TABLE Comments;
-CREATE TABLE Comments (
+CREATE TABLE IF NOT EXISTS Comments (
     commentid bigint NOT NULL,
     username varchar(255) NOT NULL,
     postid bigint NOT NULL,
@@ -29,8 +31,7 @@ CREATE TABLE Comments (
     PRIMARY KEY (commentid)
 );
 
-DROP TABLE Ratings;
-CREATE TABLE Ratings (
+CREATE TABLE IF NOT EXISTS Ratings (
     username varchar(255) NOT NULL,
     postid bigint NOT NULL,
     ratingvalue int,

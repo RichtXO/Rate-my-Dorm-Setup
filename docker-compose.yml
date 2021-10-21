@@ -16,8 +16,8 @@ services:
       - rds_api
     environment:
       - SERVER_NAME=${HOST:-localhost}
-      - REDIRECT_HTTP_TO_HTTPS=no
-      - AUTO_LETS_ENCRYPT=no
+      - REDIRECT_HTTP_TO_HTTPS=${AUTO_LE:-yes}
+      - AUTO_LETS_ENCRYPT=${AUTO_LE:-yes}
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes

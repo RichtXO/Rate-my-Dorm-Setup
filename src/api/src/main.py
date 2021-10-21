@@ -50,3 +50,10 @@ async def get_user(user_name: str):
 async def create_user(user: User_Pydantic):
     user_obj = await Users.create(**user.dict(exclude_unset=True))
     return await User_Pydantic.from_tortoise_orm(user_obj)
+
+@app.delete("/users/{user_name}", response_model=Status)
+async def delete_user(user_name: str):
+    deleted_count = await Users.filter(username=user_name).delete()
+    if not deleted_count:
+        raise HTTPException(status_code=404, detail=f"User {user_name} not found")
+    return Status(message=f"Deleted user {user_name}")

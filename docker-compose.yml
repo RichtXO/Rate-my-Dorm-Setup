@@ -5,7 +5,7 @@ volumes:
 
 services:
 
-  web:
+  rds_web:
     restart: unless-stopped
     build: ./src/web
     container_name: rds_web
@@ -16,8 +16,8 @@ services:
       - rds_api
     environment:
       - SERVER_NAME=${HOST:-localhost}
-      - REDIRECT_HTTP_TO_HTTPS=no
-      - AUTO_LETS_ENCRYPT=no
+      - REDIRECT_HTTP_TO_HTTPS=${AUTO_LE:-yes}
+      - AUTO_LETS_ENCRYPT=${AUTO_LE:-yes}
       - USE_CLIENT_CACHE=yes
       - USE_GZIP=yes
       - USE_REVERSE_PROXY=yes
@@ -25,7 +25,7 @@ services:
       - REVERSE_PROXY_HOST_1=http://rds_api:5000/
 
 
-  api:
+  rds_api:
     restart: unless-stopped
     container_name: rds_api
     build: ./src/api
@@ -35,7 +35,7 @@ services:
       - ./src/api:/app
     command: uvicorn src.main:app --reload --host 0.0.0.0 --port 5000
 
-  db:
+  rds_db:
     restart: unless-stopped
     container_name: rds_db
     image: postgres:13

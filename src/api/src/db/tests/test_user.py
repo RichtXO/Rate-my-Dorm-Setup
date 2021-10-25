@@ -28,6 +28,7 @@ follow_1 = {
     "following": "test2"
 }
 
+### Client Generators ###
 @pytest.fixture(scope="module")
 def client() -> Generator:
     initializer(["src.db.models"])
@@ -35,11 +36,11 @@ def client() -> Generator:
         yield c
     finalizer()
 
-
 @pytest.fixture(scope="module")
 def event_loop(client: TestClient) -> Generator:
     yield client.task.get_loop()
 
+### Helper functions ###
 async def get_user_by_db(uname):
     user = await Users.get(username=uname)
     return user
@@ -61,13 +62,37 @@ def test_create_user(client: TestClient, event_loop: asyncio.AbstractEventLoop):
     assert user_obj.password == user_1["password"]
 
 '''
-Test the /follow POST method
+Test the /users GET method
 '''
-def test_create_follow(client: TestClient, event_loop: asyncio.AbstractEventLoop):
+def test_get_users(client: TestClient):
     # Add second user for test case
     response = client.post("/users", json=user_2)
     assert response.status_code == 200, response.text
 
+    # Get all users and check both users and only both users are present
+    response = client.get("/users")
+    assert response.status_code == 200, response.text
+
+    data = response.json()
+    assert len(data) == 2
+    assert user_1 in data
+    assert user_2 in data
+
+'''
+Test the /user/{username} GET method
+'''
+def test_get_user(client: TestClient, event_loop: asyncio.AbstractEventLoop):
+    # Request the user by username
+    response = client.get("/user/"+user_1["username"])
+    assert response.status_code == 200, response.text
+
+    data = response.json()
+    assert data == user_1
+
+'''
+Test the /follow POST method
+'''
+def test_create_follow(client: TestClient, event_loop: asyncio.AbstractEventLoop):
     # Create and check follow relation
     response = client.post("/follow", json={
         "follower":user_1["username"], "following":user_2["username"]

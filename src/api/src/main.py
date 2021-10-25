@@ -39,12 +39,14 @@ register_tortoise(
 class Status(BaseModel):
     message: str
 
+
+### USER ENDPOINTS ###
 @app.get("/users", response_model=List[User_Pydantic])
 async def get_users():
     return await User_Pydantic.from_queryset(Users.all())
 
 @app.get(
-    "/user/{user_name}", response_model=User_Pydantic, responses={404: {"model": HTTPNotFoundError}}
+    "/users/{user_name}", response_model=User_Pydantic, responses={404: {"model": HTTPNotFoundError}}
 )
 async def get_user(user_name: str):
     return await User_Pydantic.from_queryset_single(Users.get(username=user_name))
@@ -61,6 +63,8 @@ async def delete_user(user_name: str):
         raise HTTPException(status_code=404, detail=f"User {user_name} not found")
     return Status(message=f"Deleted user {user_name}")
 
+
+### FOLLOWING ENDPOINTS ###
 @app.post("/follow", response_model=Status)
 async def create_follow(follow: Follow_Pydantic):
     follower_obj = await Users.get(username=follow.follower)
@@ -69,6 +73,15 @@ async def create_follow(follow: Follow_Pydantic):
         raise HTTPException(status_code=404, detail=f"user 1 or 2 was not found")
     await follower_obj.follows.add(following_obj)
     return Status(message=f"User {follow.follower} followed {follow.following}")
+
+@app.delete("/follow", response_model=Status)
+async def delete_follow(follow: Follow_Pydantic):
+    follower_obj = await Users.get(username=follow.follower)
+    following_obj = await Users.get(username=follow.following)
+    if follower_obj is None or following_obj is None:
+        raise HTTPException(status_code=404, detail=f"user 1 or 2 was not found")
+    await follower_obj.follows.remove(following_obj)
+    return Status(message=f"User {follow.follower} unfollowed {follow.following}")
 
 @app.get("/followers/{user}", response_model=FollowsOut)
 async def get_followers(user: str):

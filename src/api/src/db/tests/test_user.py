@@ -81,7 +81,7 @@ def test_get_users(client: TestClient):
 '''
 Test the /user/{username} GET method
 '''
-def test_get_user(client: TestClient, event_loop: asyncio.AbstractEventLoop):
+def test_get_user(client: TestClient):
     # Request the user by username
     response = client.get("/user/"+user_1["username"])
     assert response.status_code == 200, response.text
@@ -114,7 +114,7 @@ def test_create_follow(client: TestClient, event_loop: asyncio.AbstractEventLoop
 '''
 Test the /followers and /following GET methods
 '''
-def test_get_followers(client: TestClient, event_loop: asyncio.AbstractEventLoop):
+def test_get_followers(client: TestClient):
     followers2 = client.get('/followers/' + user_2["username"])
     assert followers2.status_code == 200, followers2.text
     following1 = client.get('/following/' + user_1["username"])
@@ -126,3 +126,26 @@ def test_get_followers(client: TestClient, event_loop: asyncio.AbstractEventLoop
     f1_data = following1.json()
     assert f1_data["username"] == user_1["username"]
     assert len(f1_data["follows"]) == 1 and f1_data["follows"][0] == user_2["username"]
+
+### ERROR CASES ###
+'''
+Test that POST /user throws 422 when user already exists
+'''
+def test_create_duplicate_user(client: TestClient):
+    response = client.post("/users", json=user_1)
+    assert response.status_code == 422
+
+'''
+Test that GET /user/{username} throws a 404 when username does not exist in db
+'''
+def test_get_invalid_user(client: TestClient):
+    response = client.get("/user/INVALIDUSERNAME")
+    assert response.status_code == 404
+
+'''
+Test that GET /followers and GET /following return 404 when user does not exist
+'''
+def test_get_invalid_follow(client: TestClient):
+    for endpoint in ("/followers/INVALIDUSERNAME", "/following/INVALIDUSERNAME"):
+        response = client.get(endpoint)
+        assert response.status_code == 404

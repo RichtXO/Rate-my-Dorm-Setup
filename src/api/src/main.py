@@ -41,16 +41,6 @@ class Status(BaseModel):
 
 
 ### USER ENDPOINTS ###
-@app.get("/users", response_model=List[User_Pydantic])
-async def get_users():
-    return await User_Pydantic.from_queryset(Users.all())
-
-@app.get(
-    "/users/{user_name}", response_model=User_Pydantic, responses={404: {"model": HTTPNotFoundError}}
-)
-async def get_user(user_name: str):
-    return await User_Pydantic.from_queryset_single(Users.get(username=user_name))
-
 @app.post("/users", response_model=User_Pydantic)
 async def create_user(user: User_Pydantic):
     user_obj = await Users.create(**user.dict(exclude_unset=True))
@@ -62,6 +52,16 @@ async def delete_user(user_name: str):
     if not deleted_count:
         raise HTTPException(status_code=404, detail=f"User {user_name} not found")
     return Status(message=f"Deleted user {user_name}")
+
+@app.get("/users", response_model=List[User_Pydantic])
+async def get_users():
+    return await User_Pydantic.from_queryset(Users.all())
+
+@app.get(
+    "/users/{user_name}", response_model=User_Pydantic, responses={404: {"model": HTTPNotFoundError}}
+)
+async def get_user(user_name: str):
+    return await User_Pydantic.from_queryset_single(Users.get(username=user_name))
 
 
 ### FOLLOWING ENDPOINTS ###

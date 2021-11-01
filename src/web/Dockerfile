@@ -1,11 +1,9 @@
-FROM node:lts-alpine
-
+FROM node:lts-alpine as build-stage
 WORKDIR /app
-
-RUN npm install @vue/cli@4.5.13 -g
-
-COPY package.json .
-COPY package-lock.json .
+COPY package*.json ./
 RUN npm install
+COPY . .
+RUN npm run build
 
-CMD ["npm", "run", "serve"]
+FROM bunkerity/bunkerized-nginx:1.2.8 as production-stage
+COPY --from=build-stage /app/dist /www

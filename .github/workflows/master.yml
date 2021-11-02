@@ -2,7 +2,7 @@ name: Master CI/CD
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   # Needs pytest and cypress to be implemented first before

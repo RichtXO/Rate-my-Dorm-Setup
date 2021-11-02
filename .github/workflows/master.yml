@@ -13,9 +13,10 @@ jobs:
     # needs: CI
     runs-on: self-hosted
     environment: rds-prod
-
-    # env:
-    #   TOKEN: ${{ secrets.TOKEN }}
+    
+    env:
+      HOST: ratemydormsetup.duckdns.org
+      AUTO_LE: yes
 
     steps:
       - uses:  actions/checkout@v2

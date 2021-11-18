@@ -3,3 +3,6 @@ asyncpg==0.23.0
 fastapi==0.68.0
 tortoise-orm==0.17.6
 uvicorn==0.14.0
+pytest==6.2.5
+requests==2.26.0
+asynctest==0.13.0

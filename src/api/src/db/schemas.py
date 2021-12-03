@@ -12,6 +12,12 @@ class FollowsOut(BaseModel):
     username: str
     follows: List[str]
 
+class Post_Input_Pydantic(BaseModel):
+    title: str
+    description: str
+    imagefile: str
+    posted_by: str
+
 User_Pydantic = pydantic_model_creator(Users, name="User")
 Post_Pydantic = pydantic_model_creator(Posts, name="Post")
 Comment_Pydantic = pydantic_model_creator(Comments, name="Comment")

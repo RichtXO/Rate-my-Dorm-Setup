@@ -19,7 +19,8 @@ class Posts(models.Model):
     posted_by = fields.ForeignKeyField("models.Users", related_name="poster")
     title = fields.CharField(max_length=75)
     description = fields.TextField()
-    posted_at = fields.DatetimeField(auto_now_add=True)
+    imagefile = fields.TextField()
+#    posted_at = fields.DatetimeField(auto_now_add=True)
 
 class Comments(models.Model):
     id = fields.IntField(pk=True)

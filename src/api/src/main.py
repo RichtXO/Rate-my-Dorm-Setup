@@ -3,8 +3,8 @@ from typing import List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.db.models import Users
-from src.db.schemas import User_Pydantic, Follow_Pydantic, FollowsOut
+from src.db.models import Users, Posts
+from src.db.schemas import User_Pydantic, Follow_Pydantic, FollowsOut, Post_Pydantic, Post_Input_Pydantic
 from pydantic import BaseModel
 
 from src.db.register import register_tortoise
@@ -98,3 +98,25 @@ async def get_following(user: str):
         raise HTTPException(status_code=404, detail=f"User {user} not found")
     results = [u.username async for u in dbuser.follows.all()]
     return FollowsOut(username=user, follows=results)
+
+
+### Post Endpoints ###
+
+@app.post('/posts', response_model=Status)
+async def post_post(post: Post_Input_Pydantic):
+    owner_obj = await Users.get(username=post.posted_by)
+    if owner_obj is None:
+        raise HTTPException(status_code=404, detail=f"User {post.owner} does not exist")
+    post_pyd = Post_Pydantic(title=post.title, description=post.description, imagefile=post.imagefile)#, \
+                             #posted_by_id=owner_obj.username)
+    post_obj = await Posts.create(**post_pyd.dict(exclude_unset=True), posted_by=owner_obj)
+    return Status(message=f"Created post {post.title}")
+
+@app.get('/posts', response_model=List[Post_Pydantic])
+async def get_posts():
+    return await Post_Pydantic.from_queryset(Posts.all())
+
+@app.get('/posts/{user}', response_model=List[Post_Pydantic])
+async def get_post_by_user(user : str):
+    owner_obj = await Users.get(username=user)
+    return await Post_Pydantic.from_queryset(Posts.filter(posted_by=owner_obj))

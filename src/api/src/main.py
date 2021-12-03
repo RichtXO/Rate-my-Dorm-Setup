@@ -102,7 +102,7 @@ async def get_following(user: str):
 
 ### Post Endpoints ###
 
-@app.post('/posts', response_model=Status)
+@app.post('/posts', response_model=Post_Pydantic)
 async def post_post(post: Post_Input_Pydantic):
     owner_obj = await Users.get(username=post.posted_by)
     if owner_obj is None:
@@ -110,7 +110,7 @@ async def post_post(post: Post_Input_Pydantic):
     post_pyd = Post_Pydantic(title=post.title, description=post.description, imagefile=post.imagefile)#, \
                              #posted_by_id=owner_obj.username)
     post_obj = await Posts.create(**post_pyd.dict(exclude_unset=True), posted_by=owner_obj)
-    return Status(message=f"Created post {post.title}")
+    return await Post_Pydantic.from_tortoise_orm(post_obj)
 
 @app.get('/posts', response_model=List[Post_Pydantic])
 async def get_posts():
@@ -120,3 +120,10 @@ async def get_posts():
 async def get_post_by_user(user : str):
     owner_obj = await Users.get(username=user)
     return await Post_Pydantic.from_queryset(Posts.filter(posted_by=owner_obj))
+
+@app.delete('/posts/{id}', response_model=Status)
+async def delete_post(id : str):
+    deleted_count = await Posts.filter(id=id).delete()
+    if not deleted_count:
+        raise HTTPException(status_code=404, detail=f"Post {id} not found")
+    return Status(message=f"Deleted post {id}")

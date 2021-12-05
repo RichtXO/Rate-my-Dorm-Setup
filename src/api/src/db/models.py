@@ -30,8 +30,8 @@ class Comments(models.Model):
     posted_at = fields.DatetimeField(auto_now_add=True)
 
 class Ratings(models.Model):
-    id = fields.IntField(pk=True)
+    id = fields.UUIDField(pk=True)
     rated_by = fields.ForeignKeyField("models.Users", related_name="rate")
-    postid = fields.ForeignKeyField("models.Posts", related_name="ratingid")
-    ratingvalue = fields.IntField()
+    post = fields.ForeignKeyField("models.Posts", related_name="ratingid")
+    value = fields.BooleanField()
 

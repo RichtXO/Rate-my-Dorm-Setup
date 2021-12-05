@@ -142,5 +142,5 @@ def test_delete_comment(client: TestClient, event_loop: asyncio.AbstractEventLoo
 Test the /comments DELETE method (Failure)
 '''
 def test_delete_comment_fail(client: TestClient):
-    response = client.delete("/posts/notacommentid")
+    response = client.delete("/comments/notacommentid")
     assert response.status_code == 404

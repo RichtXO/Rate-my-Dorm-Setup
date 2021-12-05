@@ -23,6 +23,17 @@ class Comment_Input_Pydantic(BaseModel):
     posted_by: str
     text: str
 
+class Rating_Input_Pydantic(BaseModel):
+    postid: str
+    rated_by: str
+    value: bool
+
+class Post_Rating_Pydantic(BaseModel):
+    postid: str
+    post_owner: str
+    post_title: str
+    post_rating: int
+
 User_Pydantic = pydantic_model_creator(Users, name="User")
 Post_Pydantic = pydantic_model_creator(Posts, name="Post")
 Comment_Pydantic = pydantic_model_creator(Comments, name="Comment")

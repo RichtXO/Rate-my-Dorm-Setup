@@ -4,9 +4,10 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.db.models import Users, Posts, Comments
+from src.db.models import Users, Posts, Comments, Ratings
 from src.db.schemas import User_Pydantic, Follow_Pydantic, FollowsOut, Post_Pydantic, Post_Input_Pydantic, \
-                           Comment_Input_Pydantic, Comment_Pydantic
+                           Comment_Input_Pydantic, Comment_Pydantic, Rating_Input_Pydantic, Rating_Pydantic, \
+                           Post_Rating_Pydantic
 from pydantic import BaseModel
 
 from src.db.register import register_tortoise
@@ -155,3 +156,53 @@ async def delete_comment(id: str):
     if not delete_count:
         raise HTTPException(status_code=404, detail=f"Comment {id} not found")
     return Status(message=f"Deleted comment {id}")
+
+### Rating Endpoints ###
+@app.post('/ratings', response_model=Rating_Pydantic)
+async def post_rating(rating: Rating_Input_Pydantic):
+    post = await Posts.get(id=rating.postid)
+    owner = await Users.get(username=rating.rated_by)
+    if post is None or owner is None:
+        raise HTTPException(status_code=404, detail=f"User {rating.rated_by} or post {rating.postid} does not exist")
+    # Check that this user has not rated this post already
+    rate = await Ratings.filter(post=post, rated_by=owner)
+    if len(rate) != 0:
+        await Ratings.get(id=rate[0].id).update(value=rating.value)
+        rate = await Ratings.get(id=rate[0].id)
+        rate_pyd = await Rating_Pydantic.from_tortoise_orm(rate)
+        rate_pyd.value = rating.value
+        return rate_pyd
+
+    rate_pyd = Rating_Pydantic(value=rating.value)
+    rate_obj = await Ratings.create(**rate_pyd.dict(exclude_unset=True), rated_by=owner, post=post)
+    return await Rating_Pydantic.from_tortoise_orm(rate_obj)
+
+@app.get('/ratings/{postid}/{username}', response_model=Rating_Pydantic)
+async def get_rating(postid: str, username: str):
+    post = await Posts.get(id=postid)
+    user = await Users.get(username=username)
+    if post is None:
+        raise HTTPException(status_code=404, detail=f"Post {postid} or User {username} does not exist")
+    rating = await Ratings.filter(post=post, rated_by=user)
+    if len(rating) == 0:
+        raise HTTPException(status_code=404, detail=f"User {username} has not rated post {postid}")
+    return await Rating_Pydantic.from_tortoise_orm(rating[0])
+
+@app.get('/ratings/{postid}', response_model=Post_Rating_Pydantic)
+async def get_post_rating(postid: str):
+    post = await Posts.get(id=postid)
+    if post is None:
+        raise HTTPException(status_code=404, detail=f"Post {postid} does not exist")
+    post.posted_by = await post.posted_by
+    likes = await Ratings.filter(post=post, value=True).count()
+    dislikes = await Ratings.filter(post=post, value=False).count()
+    rates_pyd = Post_Rating_Pydantic(postid=str(post.id), post_owner=post.posted_by.username, \
+                                     post_title=post.title, post_rating = likes - dislikes)
+    return rates_pyd
+
+@app.delete('/ratings/{id}', response_model=Status)
+async def delete_rating(id: str):
+    delete_count = await Ratings.filter(id=id).delete()
+    if not delete_count:
+        raise HTTPException(status_code=404, detail=f"Rating {id} does not exist")
+    return Status(message=f"Rating {id} deleted")

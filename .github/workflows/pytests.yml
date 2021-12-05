@@ -19,4 +19,4 @@ jobs:
       - name: Run tests with pytest
         run: pytest --disable-pytest-warnings -s
         env:
-          API_DIR: ${GITHUB_WORKSPACE}/src/api
+          API_DIR: ${{ github.workspace }}/src/api

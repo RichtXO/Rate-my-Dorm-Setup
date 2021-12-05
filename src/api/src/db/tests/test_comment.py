@@ -1,6 +1,8 @@
 import sys, os
 sys.path.insert(1, '/app')
-src_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+src_dir = os.getenv('API_DIR')
+if src_dir is None:
+    src_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 sys.path.insert(0, src_dir)
 
 import tortoise.exceptions

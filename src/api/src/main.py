@@ -191,7 +191,7 @@ async def post_rating(rating: Rating_Input_Pydantic):
     # Check that this user has not rated this post already
     rate = await Ratings.filter(post=post, rated_by=owner)
     if len(rate) != 0:
-        await Ratings.get(id=rate[0].id).update(value=rating.value)
+        await Ratings.filter(id=rate[0].id).update(value=rating.value)
         rate = await Ratings.get(id=rate[0].id)
         rate_pyd = await Rating_Pydantic.from_tortoise_orm(rate)
         rate_pyd.value = rating.value

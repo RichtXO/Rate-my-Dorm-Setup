@@ -20,11 +20,11 @@ class Posts(models.Model):
     title = fields.CharField(max_length=75)
     description = fields.TextField()
     imagefile = fields.TextField()
-#    posted_at = fields.DatetimeField(auto_now_add=True)
+    posted_at = fields.DatetimeField(auto_now_add=True)
 
 class Comments(models.Model):
-    id = fields.IntField(pk=True)
-    postid = fields.ForeignKeyField("models.Posts", related_name="comment")
+    id = fields.UUIDField(pk=True)
+    post = fields.ForeignKeyField("models.Posts", related_name="comment")
     posted_by = fields.ForeignKeyField("models.Users", related_name="commenter")
     text = fields.TextField()
     posted_at = fields.DatetimeField(auto_now_add=True)

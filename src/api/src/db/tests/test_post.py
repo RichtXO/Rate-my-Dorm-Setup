@@ -95,7 +95,6 @@ def test_get_user_posts(client: TestClient):
     response = client.get("/posts/" + test_user["username"])
     assert response.status_code == 200, response.text
     data = response.json()
-
     # Check data validity
     assert len(data) == 1
     post = data[0]

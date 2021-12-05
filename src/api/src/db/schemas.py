@@ -18,6 +18,11 @@ class Post_Input_Pydantic(BaseModel):
     imagefile: str
     posted_by: str
 
+class Comment_Input_Pydantic(BaseModel):
+    postid: str
+    posted_by: str
+    text: str
+
 User_Pydantic = pydantic_model_creator(Users, name="User")
 Post_Pydantic = pydantic_model_creator(Posts, name="Post")
 Comment_Pydantic = pydantic_model_creator(Comments, name="Comment")

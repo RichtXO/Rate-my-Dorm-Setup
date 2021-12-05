@@ -1,10 +1,12 @@
 from typing import List
+from datetime import datetime
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.db.models import Users, Posts
-from src.db.schemas import User_Pydantic, Follow_Pydantic, FollowsOut, Post_Pydantic, Post_Input_Pydantic
+from src.db.models import Users, Posts, Comments
+from src.db.schemas import User_Pydantic, Follow_Pydantic, FollowsOut, Post_Pydantic, Post_Input_Pydantic, \
+                           Comment_Input_Pydantic, Comment_Pydantic
 from pydantic import BaseModel
 
 from src.db.register import register_tortoise
@@ -101,14 +103,13 @@ async def get_following(user: str):
 
 
 ### Post Endpoints ###
-
 @app.post('/posts', response_model=Post_Pydantic)
 async def post_post(post: Post_Input_Pydantic):
     owner_obj = await Users.get(username=post.posted_by)
     if owner_obj is None:
         raise HTTPException(status_code=404, detail=f"User {post.owner} does not exist")
-    post_pyd = Post_Pydantic(title=post.title, description=post.description, imagefile=post.imagefile)#, \
-                             #posted_by_id=owner_obj.username)
+    timestamp = datetime.now()
+    post_pyd = Post_Pydantic(title=post.title, description=post.description, imagefile=post.imagefile, posted_at=timestamp)
     post_obj = await Posts.create(**post_pyd.dict(exclude_unset=True), posted_by=owner_obj)
     return await Post_Pydantic.from_tortoise_orm(post_obj)
 
@@ -127,3 +128,30 @@ async def delete_post(id : str):
     if not deleted_count:
         raise HTTPException(status_code=404, detail=f"Post {id} not found")
     return Status(message=f"Deleted post {id}")
+
+### Comment Endpoints ###
+@app.post('/comments', response_model=Comment_Pydantic)
+async def post_comment(comment: Comment_Input_Pydantic):
+    post = await Posts.get(id=comment.postid)
+    owner = await Users.get(username=comment.posted_by)
+    if post is None or owner is None:
+        raise HTTPException(status_code=404, detail=f"Post {comment.postid} or user {comment.username} does not exist")
+
+    timestamp = datetime.now()
+    comm_pyd = Comment_Pydantic(text=comment.text, posted_at=timestamp)
+    comm_obj = await Comments.create(**comm_pyd.dict(exclude_unset=True), posted_by=owner, post=post)
+    return await Comment_Pydantic.from_tortoise_orm(comm_obj)
+
+@app.get('/comments/{postid}', response_model=List[Comment_Pydantic])
+async def get_post_comments(postid: str):
+    post = await Posts.get(id=postid)
+    if post is None:
+        raise HTTPException(status_code=404, detail=f"Post {postid} does not exist")
+    return await Comment_Pydantic.from_queryset(Comments.filter(post=post))
+
+@app.delete('/comments/{id}', response_model=Status)
+async def delete_comment(id: str):
+    delete_count = await Comments.filter(id=id).delete()
+    if not delete_count:
+        raise HTTPException(status_code=404, detail=f"Comment {id} not found")
+    return Status(message=f"Deleted comment {id}")

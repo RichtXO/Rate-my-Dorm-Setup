@@ -1,3 +1,7 @@
+import tortoise.exceptions
+from tortoise.contrib.test import finalizer, initializer
+from src.db.models import Users, Posts, Comments
+from src.main import app
 import asyncio
 from typing import Generator
 
@@ -7,13 +11,9 @@ from fastapi.testclient import TestClient
 import sys
 sys.path.insert(1, '/app')
 
-from src.main import app
-from src.db.models import Users, Posts, Comments
-
-from tortoise.contrib.test import finalizer, initializer
-import tortoise.exceptions
 
 ### Client Generators ###
+
 @pytest.fixture(scope="module")
 def client() -> Generator:
     initializer(["src.db.models"])
@@ -21,44 +21,48 @@ def client() -> Generator:
         yield c
     finalizer()
 
+
 @pytest.fixture(scope="module")
 def event_loop(client: TestClient) -> Generator:
     yield client.task.get_loop()
 
+
 ### Test Data ###
 test_user = {
-    "username":"post_tester",
-    "email":"post_test@email.com",
-    "password":"test_password"
+    "username": "post_tester",
+    "email": "post_test@email.com",
+    "password": "test_password"
 }
 
 test_post = {
-    "title":"Test Post Title",
-    "description":"Test description.",
-    "imagefile":"test/image/file/path",
-    "posted_by":"post_tester"
+    "title": "Test Post Title",
+    "description": "Test description.",
+    "imagefile": "test/image/file/path",
+    "posted_by": "post_tester"
 }
 
 test_comment = {
     # Post id needs to be retrieved before comment data can be generated
-    "posted_by":"post_tester",
-    "text":"I am a comment."
+    "posted_by": "post_tester",
+    "text": "I am a comment."
 }
 
 test_comment_fails = [
     {
-        "postid":"IDon'tExist",
-        "posted_by":"post_tester",
-        "text":"I am a comment."
+        "postid": "IDon'tExist",
+        "posted_by": "post_tester",
+        "text": "I am a comment."
     },
     {
         # Want to test with a real post id, will get at runtime
-        "posted_by":"doesn'texist",
-        "text":"I am a comment."
+        "posted_by": "doesn'texist",
+        "text": "I am a comment."
     }
 ]
 
 ### Helper functions ###
+
+
 async def get_comment_by_db(commentid):
     comment = await Comments.filter(id=commentid)
     for c in comment:
@@ -70,6 +74,8 @@ async def get_comment_by_db(commentid):
 '''
 Test the /comments POST method (Success)
 '''
+
+
 def test_create_comment(client: TestClient, event_loop: asyncio.AbstractEventLoop):
     # Create the test user and post
     response = client.post("/users", json=test_user)
@@ -91,9 +97,12 @@ def test_create_comment(client: TestClient, event_loop: asyncio.AbstractEventLoo
     assert str(comment_obj.post.id) == test_comment["postid"]
     assert comment_obj.posted_by.username == test_comment["posted_by"]
 
+
 '''
 Test the /comments POST method (Failure)
 '''
+
+
 def test_create_comment_fail(client: TestClient):
     # Get actual postid
     test_comment_fails[1]["postid"] = test_comment["postid"]
@@ -102,9 +111,12 @@ def test_create_comment_fail(client: TestClient):
         response = client.post("/comments", json=c)
         assert response.status_code == 404
 
+
 '''
 Test the /comments/{postid} GET method (Success)
 '''
+
+
 def test_get_post_comments(client: TestClient):
     # Retrieve comments under our test post
     response = client.get("/comments/" + test_comment["postid"])
@@ -115,16 +127,22 @@ def test_get_post_comments(client: TestClient):
     comment = data[0]
     assert comment["text"] == test_comment["text"]
 
+
 '''
 Test the /comments/{postid} GET method (Failure)
 '''
+
+
 def test_get_post_comments_fail(client: TestClient):
     response = client.get("/comments/badpost")
     assert response.status_code == 404
 
+
 '''
 Test the /comments DELETE method (Success)
 '''
+
+
 def test_delete_comment(client: TestClient, event_loop: asyncio.AbstractEventLoop):
     # Get the post id from earlier post
     response = client.get("/comments/" + test_comment["postid"])
@@ -135,12 +153,16 @@ def test_delete_comment(client: TestClient, event_loop: asyncio.AbstractEventLoo
     assert response.status_code == 200
 
     # Verify database was updated properly
-    comment_objs = event_loop.run_until_complete(get_comment_by_db(data[0]["id"]))
+    comment_objs = event_loop.run_until_complete(
+        get_comment_by_db(data[0]["id"]))
     assert len(comment_objs) == 0
+
 
 '''
 Test the /comments DELETE method (Failure)
 '''
+
+
 def test_delete_comment_fail(client: TestClient):
     response = client.delete("/comments/notacommentid")
     assert response.status_code == 404

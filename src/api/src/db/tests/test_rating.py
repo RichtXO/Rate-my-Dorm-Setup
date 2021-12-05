@@ -1,6 +1,10 @@
 import sys, os
 sys.path.insert(1, '/app')
 src_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+print("-----SRC_DIR-------")
+print(src_dir)
+print("-----CWD--------")
+print(os.getcwd())
 sys.path.insert(0, src_dir)
 
 import tortoise.exceptions

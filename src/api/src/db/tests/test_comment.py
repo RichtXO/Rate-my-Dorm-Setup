@@ -1,3 +1,8 @@
+import sys, os
+sys.path.insert(1, '/app')
+src_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+sys.path.insert(0, src_dir)
+
 import tortoise.exceptions
 from tortoise.contrib.test import finalizer, initializer
 from src.db.models import Users, Posts, Comments
@@ -7,9 +12,6 @@ from typing import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-
-import sys
-sys.path.insert(1, '/app')
 
 
 ### Client Generators ###

@@ -7,8 +7,10 @@ sys.path.insert(0, src_dir)
 
 import tortoise.exceptions
 from tortoise.contrib.test import finalizer, initializer
+
 from src.db.models import Users
 from src.main import app
+
 import asyncio
 from typing import Generator
 

@@ -1,3 +1,8 @@
+src_dir = os.getenv('API_DIR')
+if src_dir is None:
+    src_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
+sys.path.insert(0, src_dir)
+
 from fastapi.testclient import TestClient
 import pytest
 from typing import Generator
@@ -6,13 +11,7 @@ from src.main import app
 from src.db.models import Users, Posts
 from tortoise.contrib.test import finalizer, initializer
 import tortoise.exceptions
-import sys
-import os
 sys.path.insert(1, '/app')
-src_dir = os.getenv('API_DIR')
-if src_dir is None:
-    src_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-sys.path.insert(0, src_dir)
 
 
 ### Client Generators ###

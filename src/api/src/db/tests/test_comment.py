@@ -1,19 +1,18 @@
-import sys, os
+from fastapi.testclient import TestClient
+import pytest
+from typing import Generator
+import asyncio
+from src.main import app
+from src.db.models import Users, Posts, Comments
+from tortoise.contrib.test import finalizer, initializer
+import tortoise.exceptions
+import sys
+import os
 sys.path.insert(1, '/app')
 src_dir = os.getenv('API_DIR')
 if src_dir is None:
     src_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
 sys.path.insert(0, src_dir)
-
-import tortoise.exceptions
-from tortoise.contrib.test import finalizer, initializer
-from src.db.models import Users, Posts, Comments
-from src.main import app
-import asyncio
-from typing import Generator
-
-import pytest
-from fastapi.testclient import TestClient
 
 
 ### Client Generators ###

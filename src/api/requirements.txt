@@ -6,4 +6,3 @@ uvicorn==0.14.0
 pytest==6.2.5
 requests==2.26.0
 asynctest==0.13.0
-autopep8==1.6.0

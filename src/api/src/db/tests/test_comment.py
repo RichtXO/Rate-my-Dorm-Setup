@@ -1,3 +1,4 @@
+import os, sys
 src_dir = os.getenv('API_DIR')
 if src_dir is None:
     src_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
